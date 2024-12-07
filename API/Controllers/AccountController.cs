@@ -59,6 +59,11 @@ public class AccountController(DataContext context, ITokenService tokenService) 
             Token = tokenService.CreateToken(user)
         };
     }
+    [HttpGet("test-error")]
+    public ActionResult TestExceptionMiddleware()
+    {
+        throw new Exception("This is for your error testing");
+    }
 
     private async Task<bool> UserExists(string username)
     {
