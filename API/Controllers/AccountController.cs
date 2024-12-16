@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountController(DataContext context, ITokenService tokenService) : BaseApiController
+public class AccountController(IUserService _userService, ITokenService tokenService) : BaseApiController
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto userInfo)
@@ -41,7 +41,7 @@ public class AccountController(DataContext context, ITokenService tokenService) 
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto userInfo)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == userInfo.Username.ToLower());
+        var user = await _userService.GetUserWithPhotos(userInfo.Username.ToLower());
 
         if (user == null) return Unauthorized("Invalid username");
 
@@ -57,7 +57,8 @@ public class AccountController(DataContext context, ITokenService tokenService) 
         return new UserDto
         {
             Username = user.UserName,
-            Token = tokenService.CreateToken(user)
+            Token = tokenService.CreateToken(user),
+            PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
         };
     }
     [HttpGet("test-error")]
@@ -68,6 +69,7 @@ public class AccountController(DataContext context, ITokenService tokenService) 
 
     private async Task<bool> UserExists(string username)
     {
-        return await context.Users.AnyAsync( u => u.UserName.ToLower() == username.ToLower());
+        var user = await _userService.GetUser(username.ToLower());
+        return user != null;
     }
 }
