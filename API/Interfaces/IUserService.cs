@@ -15,4 +15,5 @@ public interface IUserService
     Task<PhotoDto> AddPhotoForUser(AppUser user, ImageUploadResult photDetails);
     Task<bool> setMainPhotoForUser(AppUser user, Photo photo);
     Task<bool> DeletePhoto(AppUser user, Photo photo);
+    Task<AppUser> CreateUser(AppUser user);
 }

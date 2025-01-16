@@ -55,7 +55,7 @@ public class UserService(IUnitOfWork _unitOfWork, IMapper _mapper) : IUserServic
             Url = photDetails.SecureUrl.AbsoluteUri,
             PublicId = photDetails.PublicId
         };
-
+        if (user.Photos.Count() == 0) photo.IsMain = true;
         user.Photos.Add(photo);
 
         await _unitOfWork.Complete();
@@ -91,5 +91,15 @@ public class UserService(IUnitOfWork _unitOfWork, IMapper _mapper) : IUserServic
 
         return await _unitOfWork.Complete();
 
+    }
+
+    public async Task<AppUser> CreateUser(AppUser user)
+    {
+         if (user == null) throw new Exception("User is required");
+
+         _unitOfWork.UserRepository.Add(user);
+        await _unitOfWork.Complete();
+
+        return user;
     }
 }

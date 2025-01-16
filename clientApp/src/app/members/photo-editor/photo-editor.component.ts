@@ -43,17 +43,9 @@ export class PhotoEditorComponent implements OnInit {
   setMainPhoto(photo: Photo){
     this.memberService.setMainPhoto(photo).subscribe({
       next: _ => {
-        const user = this.accountService.currentSuer();
-        if (user) {
-          user.photoUrl = photo.url;
-          this.accountService.setCurrentUser(user);
-        }
-        const updatedMember = {...this.member()};
-        updatedMember.photoUrl = photo.url;
-        updatedMember.photos.forEach(p => {
-          if (p.isMain) p.isMain = false;
-          if (p.id === photo.id) p.isMain = true;
-        });
+        const updatedMember:Member = {...this.member()};
+        updatedMember.photos.push(photo);
+        this.UpdateMemberWithPhoto(photo, updatedMember);
         this.memberChange.emit(updatedMember);
       }
     });
@@ -74,11 +66,31 @@ export class PhotoEditorComponent implements OnInit {
 
     this.uploader.onSuccessItem = (item, response, status, headers) => {
       const photo = JSON.parse(response);
-      const updatedMember = {...this.member()};
+      const updatedMember:Member = {...this.member()};
       updatedMember.photos.push(photo);
+      if (photo.isMain) {
+        this.UpdateMemberWithPhoto(photo, updatedMember);
+      }
       this.memberChange.emit(updatedMember);
     };
 
   }
 
+
+  private UpdateMemberWithPhoto(photo: any, updatedMember: Member) {
+    
+      const user = this.accountService.currentSuer();
+      if (user) {
+        user.photoUrl = photo.url;
+        this.accountService.setCurrentUser(user);
+      }
+
+      updatedMember.photoUrl = photo.url;
+      updatedMember.photos.forEach(p => {
+        if (p.isMain) p.isMain = false;
+        if (p.id === photo.id) p.isMain = true;
+      });
+      
+    
+  }
 }
